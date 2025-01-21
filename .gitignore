@@ -1,0 +1,6 @@
+*.obj
+*.cso
+*.spv
+Zircon Engine/x64
+Zircon Pak File Helper/x64
+ZEditor/x64

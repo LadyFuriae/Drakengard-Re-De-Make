@@ -1,0 +1,2 @@
+#include "resource.h" 
+IDI_ICON1 ICON "C:/Users/LadyFuriae/Downloads/ico.ico"
