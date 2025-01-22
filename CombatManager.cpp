@@ -251,7 +251,7 @@ void CombatManager::enemy_offensive_flow(Enemy* enemy)
 
 void CombatManager::command_manager()
 {
-	generic_tools::start_song(C_V_G_P1);
+	generic_tools::start_song(SHOSTAKOVICH);
 
 	while (is_character_team_alive(character_list) && is_enemy_team_alive(enemy_list))
 	{

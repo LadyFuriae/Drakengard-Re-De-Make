@@ -1,5 +1,2 @@
-﻿  CombatManager.cpp
-C:\Users\LadyFuriae\Documents\Drakengard\Drakengard\Drakengard\CombatManager.cpp(90,62): warning C4267: 'argumento': conversión de 'size_t' a 'int'; posible pérdida de datos
-  main.cpp
-  Generando código...
+﻿  Caim.cpp
   Drakengard.vcxproj -> C:\Users\LadyFuriae\Documents\Drakengard\Drakengard\x64\Debug\Drakengard.exe

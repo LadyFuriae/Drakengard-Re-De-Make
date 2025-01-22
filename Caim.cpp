@@ -24,10 +24,10 @@ void Caim::Offensive(Enemy& Objective, const attack_attributes& attack) {
 		get_char_att()->sp -= attack.sp_cost;
 		get_char_att()->hp -= attack.hp_cost;
 		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-			char_attribs.name,
-			Objective.get_enemy_att()->name,
-			attack.name,
-			attack.damage);
+																						char_attribs.name,
+																						Objective.get_enemy_att()->name,
+																						attack.name,
+																						attack.damage);
 		std::cout << message;
 	}
 	else
@@ -38,10 +38,10 @@ void Caim::Offensive(Enemy& Objective, const attack_attributes& attack) {
 		get_char_att()->sp -= attack.sp_cost;
 		get_char_att()->hp -= attack.hp_cost;
 		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-			char_attribs.name,
-			Objective.get_enemy_att()->name,
-			attack.name,
-			reducted_attack);
+																						char_attribs.name,
+																						Objective.get_enemy_att()->name,
+																						attack.name,
+																						reducted_attack);
 		std::cout << message;
 		generic_tools::sleep(2);
 		Objective.set_covering_and_message(false);
