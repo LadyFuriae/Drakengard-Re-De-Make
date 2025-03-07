@@ -20,7 +20,7 @@ void generic_tools::song(const std::string& text) {
 }
 
 void generic_tools::song_loop(const std::string& text = "NULL") {
-	
+
 	std::wstring wide_text(text.begin(), text.end());
 	if (!should_stop) {
 		if (!PlaySound(wide_text.c_str(), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP)) {
@@ -40,7 +40,7 @@ void generic_tools::start_song(const std::string& text) {
 void generic_tools::stop_song() {
 	should_stop = true;
 	song_loop();
-	
+
 }
 
 void generic_tools::clear_console() {

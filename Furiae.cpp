@@ -1,45 +1,126 @@
 #include "Furiae.hpp"
 #include <format>
 #include "generic_tools.hpp"
-Furiae::Furiae(std::string name_of, unsigned int hp_of, unsigned int sp_of, int reduct)
-: Character(name_of, hp_of, sp_of, reduct){
 
-	physical_attack* dagger = new physical_attack("Daga", 5, 0, 0);
-	physical_attack* slap = new physical_attack("Bofetada", 1, 2, 0);
-	holy_attack* watchers = new holy_attack("Llamada a los custodios", 15, 0, 10);
-	holy_attack* pray = new holy_attack("Rezo al sello", 0 , 0, 15);
+BaseSkillAttributes furiae_basic_attack
 
-	this->phys_attack_list.push_back(dagger);
-	this->phys_attack_list.push_back(slap);
-	this->holy_attack_list.push_back(watchers);
-	this->holy_attack_list.push_back(pray);
+{
+	Objective_Type::ENEMIES,
+	"Rezo al sello",
+	15,
+	0,
+	0,
+	SkillType::HOLY,
+	"NONE",
+	false,
+};
 
-}
+BaseSkillAttributes furiae_generic_spell_1
+{
+	Objective_Type::ALLYES,
+	"Rezo al sello",
+	50,
+	0,
+	20,
+	SkillType::HOLY,
+	"Furiae reza al sello y reestablece una cantidad pequeña de HP a un aliado",
+	false,
+	0,
+	0,
+	special_action::HEAL,
+};
 
-void Furiae::Offensive(Enemy& Objective, const attack_attributes& attack) {
+BaseSkillAttributes furiae_generic_spell_2
+{
+	Objective_Type::ENEMIES,
+	"Rezo a los custodios", 
+	30, 
+	10, 
+	15, 
+	SkillType::FIRE,
+	"Furiae reza a los custios y estos golpean quemando a un enemigo.",
+	true,
+	0.10,
+	3
+};
 
-	if (!Objective.get_COVERING_STATUS()) {
+BaseSkillAttributes furiae_generic_spell_3
+{
+	Objective_Type::ALLYES,
+	"Plegaria",
+	30,
+	0,
+	15,
+	SkillType::HOLY,
+	"Furiae realiza una plegaria y potencia a los aliados",
+	false,
+	0,
+	0,
+	special_action::BUFFER,
+	modified_stat::DEFENSE
+};
 
-		Objective.get_enemy_att()->hp -= attack.damage;
-		get_char_att()->sp -= attack.sp_cost;
-		get_char_att()->hp -= attack.hp_cost;
-		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						char_attribs.name,
-																						Objective.get_enemy_att()->name,
-																						attack.name,
-																						attack.damage);
-		std::cout << message;
+
+Furiae::Furiae(std::string name_of, int MAXHP, int MAXSP, int DEFENSE, int reduction)
+	: Character(name_of, MAXHP, MAXSP, DEFENSE, reduction)
+{
+	set_weakness(Weakness::DARK);
+
+	Basic_Attack = new BaseSkill(furiae_basic_attack);
+
+	Generic_Spell* pray = new Generic_Spell(furiae_generic_spell_1);
+	Generic_Spell* mother = new Generic_Spell(furiae_generic_spell_2);
+	Generic_Spell* PRAYPRAY = new Generic_Spell(furiae_generic_spell_3);
+
+	generic_spells_list.push_back(pray);
+	generic_spells_list.push_back(mother);
+	generic_spells_list.push_back(PRAYPRAY);
+};
+
+void Furiae::basic_offensive(Enemy& Objective, const BaseSkillAttributes& attack) {
+
+	if (!Objective.get_covering_status())
+	{
+
+		if (!Objective.is_weak(attack.skill_type)) 
+		{
+			int calculated_damage = (attack.base_power + (Objective.get_entity_att()->HP * 0.10));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			get_entity_att()->SP -= attack.sp_cost;
+			get_entity_att()->HP -= attack.hp_cost;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+																							entity_attribs.name,
+																							Objective.get_entity_att()->name,
+																							attack.name,
+																							calculated_damage);
+			std::cout << message;
+		}
+		else
+		{
+			int calculated_damage = ((attack.base_power + (Objective.get_entity_att()->HP * 0.12)) + (Objective.get_entity_att()->HP * 0.10));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			get_entity_att()->SP -= attack.sp_cost;
+			get_entity_att()->HP -= attack.hp_cost;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+																							entity_attribs.name,
+																							Objective.get_entity_att()->name,
+																							attack.name,
+																							calculated_damage);
+			std::cout << "\n!Es débil!\n";
+			generic_tools::sleep(2);
+			std::cout << message;
+		}
+
 	}
 	else
 	{
-
-		int reducted_attack = (attack.damage * (100 - Objective.get_enemy_att()->COVERING_REDUCTION) / 100);
-		Objective.get_enemy_att()->hp -= reducted_attack;
-		get_char_att()->sp -= attack.sp_cost;
-		get_char_att()->hp -= attack.hp_cost;
+		int reducted_attack = (attack.base_power * (100 - Objective.get_entity_att()->COVERING_REDUCTION) / 100) + (Objective.get_entity_att()->HP * 0.10);
+		Objective.get_entity_att()->HP -= reducted_attack;
+		get_entity_att()->SP -= attack.sp_cost;
+		get_entity_att()->HP -= attack.hp_cost;
 		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						char_attribs.name,
-																						Objective.get_enemy_att()->name,
+																						entity_attribs.name,
+																						Objective.get_entity_att()->name,
 																						attack.name,
 																						reducted_attack);
 		std::cout << message;
@@ -47,8 +128,6 @@ void Furiae::Offensive(Enemy& Objective, const attack_attributes& attack) {
 		Objective.set_covering_and_message(false);
 	}
 
-	if (Objective.get_enemy_att()->hp < 0) {
-		Objective.get_enemy_att()->hp = 0;
-	}
+	Objective.check_hp();
 
 }

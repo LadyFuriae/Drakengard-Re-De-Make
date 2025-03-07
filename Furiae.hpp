@@ -10,8 +10,8 @@ class Furiae : public Character {
 
 
 public:
-	Furiae(std::string name_of = "Furiae", unsigned int hp_of = 80, unsigned int sp_of = 120, int reduct = 15);
+	Furiae(std::string name_of = "Furiae", int MAXHP = 100, int MAXSP = 150, int DEFENSE = 0, int reduction = 12);
 
-	void Offensive(Enemy& Objective, const attack_attributes& attack);
+	void basic_offensive(Enemy& Objective, const BaseSkillAttributes& attack);
 };
 #endif //FURIAE_HPP

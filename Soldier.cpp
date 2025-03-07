@@ -1,56 +1,127 @@
 #include "Soldier.hpp"
 #include "generic_tools.hpp"
 #include <format>
-Soldier::Soldier(std::string name_of, unsigned int hp_of, unsigned int sp_of, std::string type, int reduct)
-	: Enemy(name_of, hp_of, sp_of, type, reduct) {
+#include "SkillType.hpp"
+BaseSkillAttributes basic_attack
+{
+	Objective_Type::ENEMIES,
+	"su mondá",             
+	50,                     
+	0,                      
+	0,                      
+	SkillType::PHYSICAL,    
+	"NONE",                 
+	false,                  
+};
 
-	physical_attack* thrust = new physical_attack("Estocada", 15, 2, 0);
-	physical_attack* esp_attack = new physical_attack("Espadazo del caballero", 10, 0, 0);
+BaseSkillAttributes soldier_generic_spell1
+{
+	Objective_Type::ENEMIES,
+	"Bola de fuego",
+	15,
+	10,
+	15,
+	SkillType::FIRE,
+	"Inflije daño de fuego quemando a sus enemigos",
+	true,
+	0.12,
+	3,
+};
 
-	holy_attack* fire_ball = new holy_attack("Bola de fuego", 10, 0, 10);
-	holy_attack* iceball = new holy_attack("Hielo", 8, 0, 6);
+BaseSkillAttributes soldier_generic_spell2
+{
+	Objective_Type::ALLYES,
+	"Rezo a Manah",
+	30,
+	0,
+	30,
+	SkillType::DARK,
+	"Dígale a esa mamu que le chupe la mondá",
+	false,
+	0.0,
+	3,
+	special_action::BUFFER,
+	modified_stat::DEFENSE
+};
 
-	this->phys_attack_list.push_back(thrust);
-	this->phys_attack_list.push_back(esp_attack);
-	this->holy_attack_list.push_back(fire_ball);
-	this->holy_attack_list.push_back(iceball);
+BaseSkillAttributes soldier_generic_spell3
+{
+	Objective_Type::ENEMIES,
+	"Rezo a mi concha",
+	30,
+	0,
+	30,
+	SkillType::DARK,
+	"Dígale a esa mamu que le chupe la mondá",
+	false,
+	0.0,
+	3,
+	special_action::DEBUFFER,
+	modified_stat::DEFENSE
+};
+
+Soldier::Soldier(std::string name_of, int MAXHP, int MAXSP, int DEFENSE, int reduction)
+	: Enemy(name_of, MAXHP, MAXSP, DEFENSE, reduction)
+{
+	set_weakness(Weakness::DARK);
+	Basic_Attack = new BaseSkill(basic_attack);
+
+	Generic_Spell* fuego = new Generic_Spell(soldier_generic_spell1);
+	Generic_Spell* manah = new Generic_Spell(soldier_generic_spell2);
+	Generic_Spell* concha = new Generic_Spell(soldier_generic_spell3);
+	generic_spells_list.push_back(fuego);
+	generic_spells_list.push_back(manah);
+	generic_spells_list.push_back(concha);
 }
 
-void Soldier::Offensive(Character& Objective, const attack_attributes& attack) {
-	if (!Objective.get_COVERING_STATUS()) {
-
-		Objective.get_char_att()->hp -= attack.damage;
-		get_enemy_att()->sp -= attack.sp_cost;
-		get_enemy_att()->hp -= attack.hp_cost;
-		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						enemy_attribs.name,
-																						Objective.get_char_att()->name,
-																						attack.name,
-																						attack.damage);
-		std::cout << message;
+void Soldier::basic_offensive(Character& Objective, const BaseSkillAttributes& attack)
+{
+	if (!Objective.get_covering_status()) {
+		if (!Objective.is_weak(attack.skill_type)) {
+			int calculated_damage = (attack.base_power + (Objective.get_entity_att()->HP * 0.13));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			get_entity_att()->SP -= attack.sp_cost;
+			get_entity_att()->HP -= attack.hp_cost;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+				entity_attribs.name,
+				Objective.get_entity_att()->name,
+				attack.name,
+				calculated_damage);
+			std::cout << message;
+		}
+		else
+		{
+			int calculated_damage = ((attack.base_power + (Objective.get_entity_att()->HP * 0.13)) + (Objective.get_entity_att()->HP * 0.13));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			get_entity_att()->SP -= attack.sp_cost;
+			get_entity_att()->HP -= attack.hp_cost;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+				entity_attribs.name,
+				Objective.get_entity_att()->name,
+				attack.name,
+				calculated_damage);
+			std::cout << "\n!Es débil!\n";
+			generic_tools::sleep(2);
+			std::cout << message;
+		}
 	}
 	else
 	{
-		int reducted_attack = (attack.damage * (100 - Objective.get_char_att()->COVERING_REDUCTION) / 100);
-		Objective.get_char_att()->hp -= reducted_attack;
-		get_enemy_att()->sp -= attack.sp_cost;
-		get_enemy_att()->hp -= attack.hp_cost;
+		int reducted_attack = (attack.base_power * (100 - Objective.get_entity_att()->COVERING_REDUCTION) / 100) + (Objective.get_entity_att()->HP * 0.13);
+		Objective.get_entity_att()->HP -= reducted_attack;
+		get_entity_att()->SP -= attack.sp_cost;
+		get_entity_att()->HP -= attack.hp_cost;
 		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						enemy_attribs.name,
-																						Objective.get_char_att()->name,
-																						attack.name,
-																						reducted_attack);
+			entity_attribs.name,
+			Objective.get_entity_att()->name,
+			attack.name,
+			reducted_attack);
 		std::cout << message;
 		generic_tools::sleep(2);
 		Objective.set_covering_and_message(false);
-	}
-
-	if (Objective.get_char_att()->hp < 0) {
-		Objective.get_char_att()->hp = 0;
 	}
 }
 
 void Soldier::song() {
 	std::cout << "owo";
 }
-

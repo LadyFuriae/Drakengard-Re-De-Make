@@ -2,54 +2,99 @@
 #include "Caim.hpp"
 #include "generic_tools.hpp"
 #include <format>
-Caim::Caim(std::string name_of, unsigned int hp_of, unsigned int sp_of, int reduct)
-	: Character(name_of, hp_of, sp_of, reduct) {
 
-	physical_attack* Espadazo = new physical_attack("Espadazo", 5, 0, 0);
-	physical_attack* Punch = new physical_attack("Puñetazo", 3, 1, 0);
-	holy_attack* angelus = new holy_attack("Fauces de Angelus", 10, 0, 10);
-	holy_attack* raphael = new holy_attack("Ira de Raphael", 15, 5, 15);
+BaseSkillAttributes basic_attack_caim_att
+{ 
+	Objective_Type::ENEMIES,
+	"su espada", 
+	10, 
+	0, 
+	0, 
+	SkillType::PHYSICAL,  
+	"Inflije daño mínimo a un enemigo de tipo físico", 
+	false 
+};
 
-	this->phys_attack_list.push_back(Espadazo);
-	this->phys_attack_list.push_back(Punch);
-	this->holy_attack_list.push_back(angelus);
-	this->holy_attack_list.push_back(raphael);
+BaseSkillAttributes caim_generic_spell_1
+{
+	Objective_Type::ENEMIES,
+	"Ira de Angelus", 
+	30, 
+	10, 
+	15, 
+	SkillType::FIRE, 
+	"Caim invoca Angelus y quema a un enemigo", 
+	true,
+	0.15,
+	3
+};
 
+BaseSkillAttributes caim_generic_spell_2
+{
+	Objective_Type::ENEMIES,
+	"Grito de Raphael",
+	30,
+	0,
+	15,
+	SkillType::DARK,
+	"Caim invoca Raphael desde otra dimensión y maldice a un enemigo",
+	false,
+	0,
+	0,
+	special_action::DEBUFFER,
+	modified_stat::DEFENSE
+};
+
+Caim::Caim(std::string name_of, int MAXHP, int MAXSP, int DEFENSE, int reduction)
+	: Character(name_of, MAXHP, MAXSP, DEFENSE, reduction) 
+{
+	set_weakness(Weakness::DARK);
+	Basic_Attack = new BaseSkill(basic_attack_caim_att);
+
+	Generic_Spell* angelus = new Generic_Spell(caim_generic_spell_1);
+	Generic_Spell* raphael = new Generic_Spell(caim_generic_spell_2);
+	generic_spells_list.push_back(angelus);
+	generic_spells_list.push_back(raphael);
 }
-void Caim::Offensive(Enemy& Objective, const attack_attributes& attack) {
 
-	if (!Objective.get_COVERING_STATUS()) {
-
-		Objective.get_enemy_att()->hp -= attack.damage;
-		get_char_att()->sp -= attack.sp_cost;
-		get_char_att()->hp -= attack.hp_cost;
-		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						char_attribs.name,
-																						Objective.get_enemy_att()->name,
-																						attack.name,
-																						attack.damage);
-		std::cout << message;
+void Caim::basic_offensive(Enemy& Objective, const BaseSkillAttributes& attack) 
+{
+	if (!Objective.get_covering_status()) {
+		if (!Objective.is_weak(attack.skill_type)) {
+			int calculated_damage = (attack.base_power + (Objective.get_entity_att()->HP * 0.15));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+																							entity_attribs.name,
+																							Objective.get_entity_att()->name,
+																							attack.name,
+																							calculated_damage);
+			std::cout << message;
+		}
+		else
+		{
+			int calculated_damage = ((attack.base_power + (Objective.get_entity_att()->HP * 0.15)) + (Objective.get_entity_att()->HP * 0.15));
+			Objective.get_entity_att()->HP -= calculated_damage;
+			std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
+																							entity_attribs.name,
+																							Objective.get_entity_att()->name,
+																							attack.name,
+																							calculated_damage);
+			std::cout << "\n!Es débil!\n";
+			generic_tools::sleep(2);
+			std::cout << message;
+		}
 	}
 	else
 	{
-
-		int reducted_attack = (attack.damage * (100 - Objective.get_enemy_att()->COVERING_REDUCTION) / 100);
-		Objective.get_enemy_att()->hp -= reducted_attack;
-		get_char_att()->sp -= attack.sp_cost;
-		get_char_att()->hp -= attack.hp_cost;
+		int reducted_attack = (attack.base_power * (100 - Objective.get_entity_att()->COVERING_REDUCTION) / 100) + (Objective.get_entity_att()->HP * 0.15);
+		Objective.get_entity_att()->HP -= reducted_attack;
 		std::string message = std::format("\n{} ataca a {} con {} e inflije {} daño!\n",
-																						char_attribs.name,
-																						Objective.get_enemy_att()->name,
+																						entity_attribs.name,
+																						Objective.get_entity_att()->name,
 																						attack.name,
 																						reducted_attack);
 		std::cout << message;
 		generic_tools::sleep(2);
 		Objective.set_covering_and_message(false);
 	}
-
-	if (Objective.get_enemy_att()->hp < 0) {
-		Objective.get_enemy_att()->hp = 0;
-	}
-
 }
-

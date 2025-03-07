@@ -16,7 +16,7 @@
 
 extern std::atomic<bool> should_stop;
 
-namespace generic_tools{
+namespace generic_tools {
 	int random_number(int limit);
 	int random_number(int limit_start, int limit_end);
 	void song(const std::string& text);

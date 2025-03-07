@@ -9,9 +9,9 @@
 class Caim : public Character {
 
 public:
-	Caim(std::string name_of = "Caim", unsigned int hp_of = 150, unsigned int sp_of = 80, int reduct = 30);
-	
-	void Offensive(Enemy& Objective, const attack_attributes& attack);
+	Caim(std::string name_of = "Caim", int MAXHP = 150, int MAXSP = 80, int DEFENSE = 0, int reduction = 15);
+
+	void basic_offensive(Enemy& Objective, const BaseSkillAttributes& attack);
 };
 
 #endif // CAIM_HPP

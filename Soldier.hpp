@@ -2,13 +2,13 @@
 #define SOLDIER_HPP
 #pragma once
 #include "Enemy.hpp"
-#include "Attack.hpp"
+#include "BaseSkill.hpp"
 #include "vector"
 class Soldier : public Enemy {
 public:
-	Soldier(std::string name_of, unsigned int hp_of, unsigned int sp_of, std::string type = "Soldado", int reduct = 22);
+	Soldier(std::string name_of, int MAXHP = 200, int MAXSP = 150, int DEFENSE = 30, int reduction = 13);
 
-	void Offensive(Character& Objective, const attack_attributes& attack);
+	void basic_offensive(Character& Objective, const BaseSkillAttributes& attack);
 
 	void song();
 

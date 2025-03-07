@@ -1,0 +1,14 @@
+#ifndef SPELL_TYPE_HPP
+#define SPELL_TYPE_HPP
+
+enum spell_type
+{
+	HEAL,
+	HEAL_STATS_BASED,
+	BUFFER_STATS_BASED,
+	DEBUFFER,
+	DEBUFFER_STATS_BASED
+};
+
+#pragma once
+#endif // !SPELL_TYPE_HPP
